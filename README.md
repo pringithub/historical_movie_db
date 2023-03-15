@@ -1,6 +1,8 @@
 # Historical Movie Database
 The Historical Movie Database is a website and database that attempts to organize and display historical movies where they took place on a world map.
 
+[Access the Website](https://pringithub.github.io/historical_movie_db/)
+
 ![](./media/hmdb_zoomin.png)
 
 ## Purpose
@@ -26,7 +28,8 @@ Includes metadata about each movie, such as the year it was released, the direct
 - [ ] Add support for multiple locations per movie, if applicable
 - [ ] Add db column for historical accuracy, with explanations
 - [ ] Move database to online site (sheets/airtable/firebase) for easier syncing
+- [ ] Check each movie's location, historical details for inaccuracies
 - [ ] Ideate faster ways of database generation
 - [x] Databse has 100 movies
 - [ ] Database has 1000 movies
-- [ ] Check each movie's location, historical details for inaccuracies
+- [ ] Database has at least one movie per country
