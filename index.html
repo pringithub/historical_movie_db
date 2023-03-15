@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Historical Movie DB</title>
+    <link rel="icon" type="image/png" href="movie-marker.png"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <style>
+        body {
+            background-color: lightblue;
+        }
+        #map {
+            height: 85vh;
+            width: 100%;
+        }
+        #slider {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .header {
+            padding: 1px;
+            text-align: center;
+            background: #1abc9c;
+            color: white;
+            font-size: 24px;
+            /*background-image: url('reel.png');
+            background-size: cover;*/
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Historical Movie DB</h1>
+    </div>
+
+    <!--<div id="slider"></div>-->
+    <div id="map"></div>
+
+    <!--
+    <div class="header">
+        <p>Made by felcjo</p>
+    </div>
+    -->
+
+    <!--
+    <div>
+        <div>
+            <label for="year-slider">Release Year:</label>
+            <span id="year-slider-range"></span>
+            <input type="text" id="year-slider-value" readonly />
+        </div>
+        <div id="year-slider"></div>
+    </div>
+    <div>
+        <div>
+            <label for="score-slider">IMDb Score:</label>
+            <span id="score-slider-range"></span>
+            <input type="text" id="score-slider-value" readonly />
+        </div>
+        <div id="score-slider"></div>
+    </div>
+    <div>
+        <div>
+            <label for="approx-slider">Approximate Years:</label>
+            <span id="approx-slider-range"></span>
+            <input type="text" id="approx-slider-value" readonly />
+        </div>
+        <div id="approx-slider"></div>
+    </div>
+-->
+    <script>
+        // Define the URL of the CSV file
+        const csvUrl = 'movies.csv';
+
+        // Initialize the map
+        const map = L.map('map').setView([30, 0], 3);
+
+        // Add a base layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors | Website by <a href="https://github.com/pringithub">pringithub</a>',
+            maxZoom: 18
+        }).addTo(map);
+
+        // Define a movie marker icon
+        const movieIcon = L.icon({
+            iconUrl: 'movie-marker.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        // Retrieve movie data from the CSV file
+        $.get(csvUrl, data => {
+            // Parse the movie data and create markers for each movie
+            const movies = Papa.parse(data, {
+                header: true,
+                dynamicTyping: true
+            }).data.filter(movie => movie.Latitude && movie.Longitude && movie.Release_Year && movie.IMDb_Score && movie.Approximate_Year_s);
+            
+            //const movieMarkers = movies.map(movie => L.marker([movie.Latitude, movie.Longitude], { icon: movieIcon })
+            const movieMarkers = movies.map(movie => L.marker([movie.Latitude + (Math.random()-0.5)*0.01, movie.Longitude + (Math.random()-0.5)*0.01], { icon: movieIcon })
+                .bindPopup(`<b><a href="${movie.IMDb_Link}" target="_blank" and rel="noopener noreferrer" >${movie.Movie_Title} (${movie.Release_Year})</a><br />
+                            IMDb Score: ${movie.IMDb_Score}<br />
+                            Historical Era: ${movie.Historical_Era}<br />
+                            Approximate Years: ${movie.Approximate_Year_s}</b>`));
+
+            // Add the movie markers to the map
+            const movieLayer = L.layerGroup(movieMarkers).addTo(map);
+
+
+
+            
+            // Initialize the slider with the min and max movie Release_Years
+            const minRelease_Year = Math.min(...movies.map(movie => movie.Release_Year));
+            const maxRelease_Year = Math.max(...movies.map(movie => movie.Release_Year));
+            $('#slider').slider({
+                range: true,
+                min: minRelease_Year,
+                max: maxRelease_Year,
+                values: [minRelease_Year, maxRelease_Year],
+                slide: (event, ui) => {
+                    // Filter the movie data based on the slider values
+                    const filteredMovies = movies.filter(movie => movie.Release_Year >= ui.values[0] && movie.Release_Year <= ui.values[1]);
+
+                    // Update the movie markers on the map
+                    movieLayer.clearLayers();
+                    movieMarkers.filter(marker => {
+                        const movie = marker.getPopup().getContent();
+                        const Release_Year = parseInt(movie.match(/\((\d+)\)/)[1]);
+                        return Release_Year >= ui.values[0] && Release_Year <= ui.values[1];
+                    }).forEach(marker => {
+                        movieLayer.addLayer(marker);
+                    });
+                }
+            });
+        });
+
+
+
+    </script>
