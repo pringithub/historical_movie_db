@@ -28,6 +28,7 @@ Includes metadata about each movie, such as the year it was released, the direct
 - [x] Add support for multiple locations per movie, if applicable
 - [x] Add db column for historical accuracy, with explanations
 - [x] Move database to online site (sheets/airtable/firebase) for easier syncing
+- [x] Update historical years to be filterable
 - [ ] Check each movie's location, historical details for inaccuracies
 - [ ] Ideate faster ways of database generation
 - [x] Database has 100 movies
