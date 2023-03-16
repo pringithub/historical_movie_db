@@ -167,14 +167,20 @@
             // Add the movie markers to the map
             const movieLayer = L.layerGroup(movieMarkers).addTo(map);
             
-
             // Define the slider options
             const yearSliderOpts = {
                 range: true,
                 min: 1900,
                 max: 2023,
+                step: 1,
                 values: [1900, 2023],
                 slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#year-range').text(`${min} - ${max}`);
+                    filterMovies();
+                },
+                change: (event, ui) => {
                     const min = ui.values[0];
                     const max = ui.values[1];
                     $('#year-range').text(`${min} - ${max}`);
@@ -193,6 +199,12 @@
                     const max = ui.values[1];
                     $('#score-range').text(`${min} - ${max}`);
                     filterMovies();
+                },
+                change: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#score-range').text(`${min} - ${max}`);
+                    filterMovies();
                 }
             };
 
@@ -206,6 +218,12 @@
                     const max = ui.values[1];
                     $('#approx-year-range').text(`${min} - ${max}`);
                     filterMovies();
+                },
+                change: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#approx-year-range').text(`${min} - ${max}`);
+                    filterMovies();
                 }
             };
 
@@ -215,6 +233,12 @@
                 max: 10,
                 values: [0, 10],
                 slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#accuracy-range').text(`${min} - ${max}`);
+                    filterMovies();
+                },
+                change: (event, ui) => {
                     const min = ui.values[0];
                     const max = ui.values[1];
                     $('#accuracy-range').text(`${min} - ${max}`);
