@@ -27,7 +27,7 @@ Includes metadata about each movie, such as the year it was released, the direct
 - [x] Integrate sliders to filter movies shown based on Release_Year, IMDb_Score, and Approximate_Year, Historical_Accuracy_Rating
 - [x] Add support for multiple locations per movie, if applicable
 - [x] Add db column for historical accuracy, with explanations
-- [ ] Move database to online site (sheets/airtable/firebase) for easier syncing
+- [x] Move database to online site (sheets/airtable/firebase) for easier syncing
 - [ ] Check each movie's location, historical details for inaccuracies
 - [ ] Ideate faster ways of database generation
 - [x] Database has 100 movies

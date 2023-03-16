@@ -84,7 +84,7 @@
         </table>
         <div id="score-slider"></div> 
         <br/>
-    <!--
+    
         <table>
             <tr>
                 <th><label for="approx-year-slider">Approximate Historical Year:</label></th>
@@ -93,7 +93,7 @@
         </table>
         <div id="approx-year-slider"></div> 
         <br/>
-    -->
+    
         <table>
             <tr>
                 <th><label for="accuracy-slider">Historical Accuracy Rating:</label></th>
@@ -110,7 +110,7 @@
 
     <script>
         // Define the URL of the CSV file
-        const csvUrl = 'movies.csv';
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnc6XJI4ZjCotmhOaFd2Nk-jDp6JL_f-yYNlseM1DQHYhica5RlTNC-C1Vpso78RjQ3jY-N5peW4yu/pub?gid=0&single=true&output=csv';
 
         // Initialize the map
         const map = L.map('map').setView([30, 0], 3);
@@ -210,18 +210,23 @@
 
             const approxYearSliderOpts = {
                 range: true,
-                min: 0,
+                min: -3000,
                 max: 2023,
-                values: [0, 2023],
+                step: 10,
+                values: [-3000, 2023],
                 slide: (event, ui) => {
-                    const min = ui.values[0];
-                    const max = ui.values[1];
+                    var minval = ui.values[0];
+                    var maxval = ui.values[1];
+                    const min = (minval < 0 ? -1*minval+'BC' : minval+'AD');
+                    const max = (maxval < 0 ? -1*maxval+'BC' : maxval+'AD');
                     $('#approx-year-range').text(`${min} - ${max}`);
                     filterMovies();
                 },
                 change: (event, ui) => {
-                    const min = ui.values[0];
-                    const max = ui.values[1];
+                    var minval = ui.values[0];
+                    var maxval = ui.values[1];
+                    const min = (minval < 0 ? -1*minval+'BC' : minval+'AD');
+                    const max = (maxval < 0 ? -1*maxval+'BC' : maxval+'AD');
                     $('#approx-year-range').text(`${min} - ${max}`);
                     filterMovies();
                 }
