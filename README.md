@@ -3,7 +3,7 @@ The Historical Movie Database is a website and database that attempts to organiz
 
 [Access the Website](https://pringithub.github.io/historical_movie_db/)
 
-![](./media/hmdb_zoomin.png)
+![](./media/hmdb.png)
 
 ## Purpose
 This project came out of my love for movies that attempt to recreate the past: historical epics, documentaries, and the like. I wanted to have a one-stop place where I could browse movies by location and time period relatively easily.
