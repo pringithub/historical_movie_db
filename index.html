@@ -102,7 +102,7 @@
             const movies = Papa.parse(data, {
                 header: true,
                 dynamicTyping: true
-            }).data.filter(movie => movie.Latitude && movie.Longitude && movie.Release_Year && movie.IMDb_Score && movie.Approximate_Year_s && movie.GPS_Location_s);
+            }).data.filter(movie => movie.Latitude && movie.Longitude);
             
             const movieMarkers = [];
 
@@ -117,11 +117,13 @@
 
                     // Create a marker with the latitude and longitude
                     const marker = L.marker([lat, lng], { icon: movieIcon })
-                    .bindPopup(`<b><a href="${movie.IMDb_Link}" target="_blank" and rel="noopener noreferrer" >${movie.Movie_Title} (${movie.Release_Year})</a><br />
-                                IMDb Score: ${movie.IMDb_Score}<br />
-                                Location(s): ${movie.Cities}<br />
-                                Historical Era: ${movie.Historical_Era}<br />
-                                Approximate Years: ${movie.Approximate_Year_s}</b>`);
+                    .bindPopup(`<b><a href="${movie.IMDb_Link}" target="_blank" and rel="noopener noreferrer" style="font-size: 20px">${movie.Movie_Title} (${movie.Release_Year})</a><br />
+                                <p style="font-size: 14px">
+                                    IMDb Score: ${movie.IMDb_Score}<br />
+                                    Location(s): ${movie.Cities}<br />
+                                    Historical Era: ${movie.Historical_Era}<br />
+                                    Approximate Years: ${movie.Approximate_Year_s}<br />
+                                    Historical Accuracy Rating: ${movie.Historical_Accuracy_Rating}</p></b>`);
 
                     // Add the marker to the movieMarkers array
                     movieMarkers.push(marker);
