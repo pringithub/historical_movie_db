@@ -102,14 +102,32 @@
             const movies = Papa.parse(data, {
                 header: true,
                 dynamicTyping: true
-            }).data.filter(movie => movie.Latitude && movie.Longitude && movie.Release_Year && movie.IMDb_Score && movie.Approximate_Year_s);
+            }).data.filter(movie => movie.Latitude && movie.Longitude && movie.Release_Year && movie.IMDb_Score && movie.Approximate_Year_s && movie.GPS_Location_s);
             
-            //const movieMarkers = movies.map(movie => L.marker([movie.Latitude, movie.Longitude], { icon: movieIcon })
-            const movieMarkers = movies.map(movie => L.marker([movie.Latitude + (Math.random()-0.5)*0.01, movie.Longitude + (Math.random()-0.5)*0.01], { icon: movieIcon })
-                .bindPopup(`<b><a href="${movie.IMDb_Link}" target="_blank" and rel="noopener noreferrer" >${movie.Movie_Title} (${movie.Release_Year})</a><br />
-                            IMDb Score: ${movie.IMDb_Score}<br />
-                            Historical Era: ${movie.Historical_Era}<br />
-                            Approximate Years: ${movie.Approximate_Year_s}</b>`));
+            const movieMarkers = [];
+
+            movies.forEach(movie => {
+                // Split the GPS_Coordinates field by semicolon to get an array of coordinate pairs
+                const coordinatePairs = movie.GPS_Location_s.split(';');
+
+                // Loop through the coordinate pairs and create a marker for each one
+                coordinatePairs.forEach(coordinatePair => {
+                    // Split the coordinate pair by comma to get the latitude and longitude
+                    const [lat, lng] = coordinatePair.split(',');
+
+                    // Create a marker with the latitude and longitude
+                    const marker = L.marker([lat, lng], { icon: movieIcon })
+                    .bindPopup(`<b><a href="${movie.IMDb_Link}" target="_blank" and rel="noopener noreferrer" >${movie.Movie_Title} (${movie.Release_Year})</a><br />
+                                IMDb Score: ${movie.IMDb_Score}<br />
+                                Location(s): ${movie.Cities}<br />
+                                Historical Era: ${movie.Historical_Era}<br />
+                                Approximate Years: ${movie.Approximate_Year_s}</b>`);
+
+                    // Add the marker to the movieMarkers array
+                    movieMarkers.push(marker);
+                });
+            });
+
 
             // Add the movie markers to the map
             const movieLayer = L.layerGroup(movieMarkers).addTo(map);
