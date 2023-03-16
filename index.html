@@ -84,7 +84,7 @@
         </table>
         <div id="score-slider"></div> 
         <br/>
-    
+    <!--
         <table>
             <tr>
                 <th><label for="approx-year-slider">Approximate Historical Year:</label></th>
@@ -93,7 +93,7 @@
         </table>
         <div id="approx-year-slider"></div> 
         <br/>
-    
+    -->
         <table>
             <tr>
                 <th><label for="accuracy-slider">Historical Accuracy Rating:</label></th>
@@ -111,6 +111,7 @@
     <script>
         // Define the URL of the CSV file
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnc6XJI4ZjCotmhOaFd2Nk-jDp6JL_f-yYNlseM1DQHYhica5RlTNC-C1Vpso78RjQ3jY-N5peW4yu/pub?gid=0&single=true&output=csv';
+        //const csvUrl = 'movies.csv';
 
         // Initialize the map
         const map = L.map('map').setView([30, 0], 3);
@@ -135,7 +136,7 @@
             const movies = Papa.parse(data, {
                 header: true,
                 dynamicTyping: true
-            }).data.filter(movie => movie.Latitude && movie.Longitude);
+            }).data.filter(movie => movie.GPS_Location_s);
             
             const movieMarkers = [];
 
@@ -167,6 +168,7 @@
             // Add the movie markers to the map
             const movieLayer = L.layerGroup(movieMarkers).addTo(map);
             
+
             // Define the slider options
             const yearSliderOpts = {
                 range: true,
@@ -180,7 +182,7 @@
                     $('#year-range').text(`${min} - ${max}`);
                     filterMovies();
                 },
-                change: (event, ui) => {
+                stop: (event, ui) => {
                     const min = ui.values[0];
                     const max = ui.values[1];
                     $('#year-range').text(`${min} - ${max}`);
@@ -200,7 +202,7 @@
                     $('#score-range').text(`${min} - ${max}`);
                     filterMovies();
                 },
-                change: (event, ui) => {
+                stop: (event, ui) => {
                     const min = ui.values[0];
                     const max = ui.values[1];
                     $('#score-range').text(`${min} - ${max}`);
@@ -214,6 +216,9 @@
                 max: 2023,
                 step: 10,
                 values: [-3000, 2023],
+                create: (event, ui) => {
+                    $('#approx-year-range').text(`3000BC - 2020AD`);
+                },
                 slide: (event, ui) => {
                     var minval = ui.values[0];
                     var maxval = ui.values[1];
@@ -222,7 +227,7 @@
                     $('#approx-year-range').text(`${min} - ${max}`);
                     filterMovies();
                 },
-                change: (event, ui) => {
+                stop: (event, ui) => {
                     var minval = ui.values[0];
                     var maxval = ui.values[1];
                     const min = (minval < 0 ? -1*minval+'BC' : minval+'AD');
@@ -243,7 +248,7 @@
                     $('#accuracy-range').text(`${min} - ${max}`);
                     filterMovies();
                 },
-                change: (event, ui) => {
+                stop: (event, ui) => {
                     const min = ui.values[0];
                     const max = ui.values[1];
                     $('#accuracy-range').text(`${min} - ${max}`);
@@ -254,20 +259,30 @@
             // Initialize the sliders
             $('#year-slider').slider(yearSliderOpts);
             $('#score-slider').slider(scoreSliderOpts);
-            $('#approx-year-slider').slider(approxYearSliderOpts);
+            //$('#approx-year-slider').slider(approxYearSliderOpts);
             $('#accuracy-slider').slider(accuracySliderOpts);
 
             // Display the initial slider ranges
             $('#year-range').text(`${yearSliderOpts.values[0]} - ${yearSliderOpts.values[1]}`);
             $('#score-range').text(`${scoreSliderOpts.values[0]} - ${scoreSliderOpts.values[1]}`);
-            $('#approx-year-range').text(`${approxYearSliderOpts.values[0]} - ${approxYearSliderOpts.values[1]}`);
+            //$('#approx-year-range').text(`${approxYearSliderOpts.values[0]} - ${approxYearSliderOpts.values[1]}`);
             $('#accuracy-range').text(`${accuracySliderOpts.values[0]} - ${accuracySliderOpts.values[1]}`);
+
+            // Create a marker lookup for optimization when filtering
+            const markerLookup = {};
+            movieMarkers.forEach(marker => {
+                const imdbId = marker.getPopup().getContent().substring(39, 48);
+                if (!markerLookup[imdbId]) {
+                    markerLookup[imdbId] = [];
+                }
+                markerLookup[imdbId].push(marker);
+            });
 
              // Define a function to filter the movies based on the slider values
             const filterMovies = () => {
                 const yearRange = $('#year-slider').slider('values');
                 const scoreRange = $('#score-slider').slider('values');
-                const approxYearRange = $('#approx-year-slider').slider('values');
+                //const approxYearRange = $('#approx-year-slider').slider('values');
                 const accuracyRange = $('#accuracy-slider').slider('values');
 
                 const filteredMovies = movies.filter(movie => {
@@ -287,11 +302,12 @@
                 // Update the movie markers on the map
                 movieLayer.clearLayers();
                 filteredMovies.forEach(movie => {
-                    const marker = movieMarkers.find(marker => {
-                        return marker.getPopup().getContent().substring(39,48) === movie.IMDb_Link.substring(27,36);
-                    });
-                    if (marker) {
-                        movieLayer.addLayer(marker);
+                    const imdbId = movie.IMDb_Link.substring(27, 36);
+                    const matchingMarkers = markerLookup[imdbId];
+                    if (matchingMarkers) {
+                        matchingMarkers.forEach(marker => {
+                            movieLayer.addLayer(marker);
+                        });
                     }
                 });
             }
