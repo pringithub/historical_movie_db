@@ -84,7 +84,7 @@
         </table>
         <div id="score-slider"></div> 
         <br/>
-    <!--
+    
         <table>
             <tr>
                 <th><label for="approx-year-slider">Approximate Historical Year:</label></th>
@@ -93,7 +93,7 @@
         </table>
         <div id="approx-year-slider"></div> 
         <br/>
-    -->
+    
         <table>
             <tr>
                 <th><label for="accuracy-slider">Historical Accuracy Rating:</label></th>
@@ -168,7 +168,8 @@
             // Add the movie markers to the map
             const movieLayer = L.layerGroup(movieMarkers).addTo(map);
             
-
+            // NOTE - if ever the UI starts lagging, change slide and stop to just be 'change', 
+            //  this will decrease CPU load as it will not run filterMovies every time the slider moves
             // Define the slider options
             const yearSliderOpts = {
                 range: true,
@@ -216,9 +217,6 @@
                 max: 2023,
                 step: 10,
                 values: [-3000, 2023],
-                create: (event, ui) => {
-                    $('#approx-year-range').text(`3000BC - 2020AD`);
-                },
                 slide: (event, ui) => {
                     var minval = ui.values[0];
                     var maxval = ui.values[1];
@@ -259,13 +257,13 @@
             // Initialize the sliders
             $('#year-slider').slider(yearSliderOpts);
             $('#score-slider').slider(scoreSliderOpts);
-            //$('#approx-year-slider').slider(approxYearSliderOpts);
+            $('#approx-year-slider').slider(approxYearSliderOpts);
             $('#accuracy-slider').slider(accuracySliderOpts);
 
             // Display the initial slider ranges
             $('#year-range').text(`${yearSliderOpts.values[0]} - ${yearSliderOpts.values[1]}`);
             $('#score-range').text(`${scoreSliderOpts.values[0]} - ${scoreSliderOpts.values[1]}`);
-            //$('#approx-year-range').text(`${approxYearSliderOpts.values[0]} - ${approxYearSliderOpts.values[1]}`);
+            $('#approx-year-range').text(`3000BC - 2020AD`);
             $('#accuracy-range').text(`${accuracySliderOpts.values[0]} - ${accuracySliderOpts.values[1]}`);
 
             // Create a marker lookup for optimization when filtering
@@ -282,19 +280,34 @@
             const filterMovies = () => {
                 const yearRange = $('#year-slider').slider('values');
                 const scoreRange = $('#score-slider').slider('values');
-                //const approxYearRange = $('#approx-year-slider').slider('values');
+                const approxYearRange = $('#approx-year-slider').slider('values');
                 const accuracyRange = $('#accuracy-slider').slider('values');
 
                 const filteredMovies = movies.filter(movie => {
                     const year = movie.Release_Year;
                     const score = movie.IMDb_Score;
-                    const approxYear = movie.Approximate_Year;
                     const accuracy = movie.Historical_Accuracy_Rating;
+                    
+                    var approxYearMinMax;
+                    try {
+                        var approxYearMinMax = movie.Approximate_Year_s.toString().split('-');
+                    } catch { 
+                        return false;
+                    }
+                    var yearsAreInRange;
+                    var movieMin = approxYearMinMax[0];
+                    if (movieMin[0] == 'b') movieMin = parseInt(movieMin.replace('b','-'));
+                    yearsAreInRange = movieMin >= approxYearRange[0] && movieMin <= approxYearRange[1];
+                    if (approxYearMinMax.length > 1) { 
+                        var movieMax = approxYearMinMax[1]; 
+                        if (movieMax[0] == 'b') movieMax = parseInt(movieMax.replace('b','-'));
+                        yearsAreInRange = yearsAreInRange && movieMax >= approxYearRange[0] && movieMax <= approxYearRange[1];
+                    }
 
                     return (
                         year >= yearRange[0] && year <= yearRange[1] &&
                         score >= scoreRange[0] && score <= scoreRange[1] &&
-                        //approxYear >= approxYearRange[0] && approxYear <= approxYearRange[1] &&
+                        yearsAreInRange &&
                         accuracy >= accuracyRange[0] && accuracy <= accuracyRange[1]
                     );
                 });
