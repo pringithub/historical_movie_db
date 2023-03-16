@@ -24,12 +24,12 @@ Generates a list of historical movies based on a user's input of start and end y
 Includes metadata about each movie, such as the year it was released, the director, and the cast.
 
 ## TODO
-- [ ] Integrate sliders to filter movies shown based on Release_Year, IMDb_Score, and Approximate_Year, Historical_Accuracy_Rating
+- [x] Integrate sliders to filter movies shown based on Release_Year, IMDb_Score, and Approximate_Year, Historical_Accuracy_Rating
 - [x] Add support for multiple locations per movie, if applicable
 - [x] Add db column for historical accuracy, with explanations
 - [ ] Move database to online site (sheets/airtable/firebase) for easier syncing
 - [ ] Check each movie's location, historical details for inaccuracies
 - [ ] Ideate faster ways of database generation
-- [x] Databse has 100 movies
+- [x] Database has 100 movies
 - [ ] Database has 1000 movies
 - [ ] Database has at least one movie per country

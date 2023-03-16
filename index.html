@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Historical Movie DB</title>
+    <title>Historical Movie Map</title>
     <link rel="icon" type="image/png" href="movie-marker.png"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
@@ -30,51 +30,84 @@
             background: #1abc9c;
             color: white;
             font-size: 24px;
-            /*background-image: url('reel.png');
-            background-size: cover;*/
         }
+        
+        button {
+            background-color: #1abc9c; /* Blue background */
+            border: none; /* Remove borders */
+            color: white; /* White text */
+            padding: 12px 16px; /* Some padding */
+            font-size: 16px; /* Set a font size */
+            cursor: pointer; /* Mouse pointer on hover */
+        }
+
+        /* Darker background on mouse-over */
+        button:hover {
+            background-color: #03ffcd;
+        }
+
+        .anel {
+            position: absolute;
+            bottom: 2%;
+            left: 1%;
+            z-index: 1;
+            background-color: azure;
+            padding: 2%;
+        }
+
+        #map {
+            z-index: 0;
+        }
+
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Historical Movie DB</h1>
+        <h1>Historical Movie Map</h1>
     </div>
 
-    <!--<div id="slider"></div>-->
+    <div class="anel">
+        <table>
+            <tr>
+                <th><label for="year-slider">Release Year:</label></th>
+                <th><div id="year-range"></div></th>
+            </tr>
+        </table>
+        <div id="year-slider"></div> 
+        <br/>
+
+        <table>
+            <tr>
+                <th><label for="score-slider">IMDb Score:</label></th>
+                <th><div id="score-range"></div></th>
+            </tr>
+        </table>
+        <div id="score-slider"></div> 
+        <br/>
+    <!--
+        <table>
+            <tr>
+                <th><label for="approx-year-slider">Approximate Historical Year:</label></th>
+                <th><div id="approx-year-range"></div></th>
+            </tr>
+        </table>
+        <div id="approx-year-slider"></div> 
+        <br/>
+    -->
+        <table>
+            <tr>
+                <th><label for="accuracy-slider">Historical Accuracy Rating:</label></th>
+                <th><div id="accuracy-range"></div></th>
+            </tr>
+        </table>
+        <div id="accuracy-slider"></div>
+
+        <br/>
+        <button id="reset-sliders-btn">Reset Sliders</button>
+    </div>  
+
     <div id="map"></div>
 
-    <!--
-    <div class="header">
-        <p>Made by felcjo</p>
-    </div>
-    -->
-
-    <!--
-    <div>
-        <div>
-            <label for="year-slider">Release Year:</label>
-            <span id="year-slider-range"></span>
-            <input type="text" id="year-slider-value" readonly />
-        </div>
-        <div id="year-slider"></div>
-    </div>
-    <div>
-        <div>
-            <label for="score-slider">IMDb Score:</label>
-            <span id="score-slider-range"></span>
-            <input type="text" id="score-slider-value" readonly />
-        </div>
-        <div id="score-slider"></div>
-    </div>
-    <div>
-        <div>
-            <label for="approx-slider">Approximate Years:</label>
-            <span id="approx-slider-range"></span>
-            <input type="text" id="approx-slider-value" readonly />
-        </div>
-        <div id="approx-slider"></div>
-    </div>
--->
     <script>
         // Define the URL of the CSV file
         const csvUrl = 'movies.csv';
@@ -133,35 +166,123 @@
 
             // Add the movie markers to the map
             const movieLayer = L.layerGroup(movieMarkers).addTo(map);
-
-
-
             
-            // Initialize the slider with the min and max movie Release_Years
-            const minRelease_Year = Math.min(...movies.map(movie => movie.Release_Year));
-            const maxRelease_Year = Math.max(...movies.map(movie => movie.Release_Year));
-            $('#slider').slider({
-                range: true,
-                min: minRelease_Year,
-                max: maxRelease_Year,
-                values: [minRelease_Year, maxRelease_Year],
-                slide: (event, ui) => {
-                    // Filter the movie data based on the slider values
-                    const filteredMovies = movies.filter(movie => movie.Release_Year >= ui.values[0] && movie.Release_Year <= ui.values[1]);
 
-                    // Update the movie markers on the map
-                    movieLayer.clearLayers();
-                    movieMarkers.filter(marker => {
-                        const movie = marker.getPopup().getContent();
-                        const Release_Year = parseInt(movie.match(/\((\d+)\)/)[1]);
-                        return Release_Year >= ui.values[0] && Release_Year <= ui.values[1];
-                    }).forEach(marker => {
-                        movieLayer.addLayer(marker);
-                    });
+            // Define the slider options
+            const yearSliderOpts = {
+                range: true,
+                min: 1900,
+                max: 2023,
+                values: [1900, 2023],
+                slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#year-range').text(`${min} - ${max}`);
+                    filterMovies();
                 }
-            });
+            };
+
+            const scoreSliderOpts = {
+                range: true,
+                min: 0,
+                max: 10,
+                step: 0.1,
+                values: [0, 10],
+                slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#score-range').text(`${min} - ${max}`);
+                    filterMovies();
+                }
+            };
+
+            const approxYearSliderOpts = {
+                range: true,
+                min: 0,
+                max: 2023,
+                values: [0, 2023],
+                slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#approx-year-range').text(`${min} - ${max}`);
+                    filterMovies();
+                }
+            };
+
+            const accuracySliderOpts = {
+                range: true,
+                min: 0,
+                max: 10,
+                values: [0, 10],
+                slide: (event, ui) => {
+                    const min = ui.values[0];
+                    const max = ui.values[1];
+                    $('#accuracy-range').text(`${min} - ${max}`);
+                    filterMovies();
+                }
+            };
+
+            // Initialize the sliders
+            $('#year-slider').slider(yearSliderOpts);
+            $('#score-slider').slider(scoreSliderOpts);
+            $('#approx-year-slider').slider(approxYearSliderOpts);
+            $('#accuracy-slider').slider(accuracySliderOpts);
+
+            // Display the initial slider ranges
+            $('#year-range').text(`${yearSliderOpts.values[0]} - ${yearSliderOpts.values[1]}`);
+            $('#score-range').text(`${scoreSliderOpts.values[0]} - ${scoreSliderOpts.values[1]}`);
+            $('#approx-year-range').text(`${approxYearSliderOpts.values[0]} - ${approxYearSliderOpts.values[1]}`);
+            $('#accuracy-range').text(`${accuracySliderOpts.values[0]} - ${accuracySliderOpts.values[1]}`);
+
+             // Define a function to filter the movies based on the slider values
+            const filterMovies = () => {
+                const yearRange = $('#year-slider').slider('values');
+                const scoreRange = $('#score-slider').slider('values');
+                const approxYearRange = $('#approx-year-slider').slider('values');
+                const accuracyRange = $('#accuracy-slider').slider('values');
+
+                const filteredMovies = movies.filter(movie => {
+                    const year = movie.Release_Year;
+                    const score = movie.IMDb_Score;
+                    const approxYear = movie.Approximate_Year;
+                    const accuracy = movie.Historical_Accuracy_Rating;
+
+                    return (
+                        year >= yearRange[0] && year <= yearRange[1] &&
+                        score >= scoreRange[0] && score <= scoreRange[1] &&
+                        //approxYear >= approxYearRange[0] && approxYear <= approxYearRange[1] &&
+                        accuracy >= accuracyRange[0] && accuracy <= accuracyRange[1]
+                    );
+                });
+
+                // Update the movie markers on the map
+                movieLayer.clearLayers();
+                filteredMovies.forEach(movie => {
+                    const marker = movieMarkers.find(marker => {
+                        return marker.getPopup().getContent().substring(39,48) === movie.IMDb_Link.substring(27,36);
+                    });
+                    if (marker) {
+                        movieLayer.addLayer(marker);
+                    }
+                });
+            }
+
+            // Define a function to reset the slider values to their defaults
+            const resetSliders = () => {
+                $('#year-slider').slider('values', [1900, 2023]);
+                $('#score-slider').slider('values', [0, 10]);
+                $('#approx-year-slider').slider('values', [0, 2023]);
+                $('#accuracy-slider').slider('values', [0, 10]);
+                filterMovies(); // Call the filterMovies function to update the map markers
+            };
+
+            // Attach an event listener to the reset button
+            $('#reset-sliders-btn').click(resetSliders);
+
         });
 
 
-
     </script>
+
+</body>
+</html>
